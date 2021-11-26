@@ -1,18 +1,19 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, get_list_or_404
+from .models import Receita
 
 def index(request):
+    receitas = Receita.objects.all()
+
     dados = {
-        1: 'Lasanha',
-        2: 'Bolo de chocolate',
-        3: 'Purê de batatass'
+        'receitas': receitas
     }
 
-    receitas = {
-        'nome_das_receitas': dados
+    return render(request, 'index.html', dados)
+
+def receita(request, id):
+    receita = get_object_or_404(Receita, pk=id)
+
+    dados = {
+        'receita': receita
     }
-
-    return render(request, 'index.html', receitas)
-
-def receita(request):
-    return render(request, 'receita.html')
+    return render(request, 'receita.html', dados)
