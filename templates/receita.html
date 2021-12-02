@@ -2,6 +2,8 @@
 {% load static %}
 {% block content %}
 
+    {% include 'partials/busca.html' %}
+
     {% include 'partials/menu.html' %}
 
     <!-- Receipe Post Search -->
@@ -29,12 +31,15 @@
         <div class="row">
             <div class="col-12">
                 <div class="receipe-slider owl-carousel">
-                    <img src="{% static 'img/bg-img/tomate_banner.jpg' %}">
+                    {% if receita.foto_receita == '' %}
+                        <img src="{% static 'img/bg-img/tomate_banner.jpg' %}">
+                    {% else %}
+                        <img src="{{ receita.foto_receita.url }}">
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- Receipe Content Area -->
     <div class="receipe-content-area">
@@ -49,7 +54,7 @@
                             <h6>Preparo: {{ receita.tempo_preparo }} minutos</h6>
                             <h6>Rendimento: {{ receita.rendimento }}</h6>
                             <h6>Categoria: {{ receita.categoria }}</h6>
-                            <h6>Por: Pessoa</h6>
+                            <h6>Por: {{ receita.pessoa }}</h6>
                         </div>
                     </div>
                 </div>
