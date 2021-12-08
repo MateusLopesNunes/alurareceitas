@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib import auth
+from django.contrib import auth, messages
 from receitas.models import Receita
 
 def login(request):
@@ -26,26 +26,31 @@ def cadastro(request):
         senha = request.POST['password']
         senha2 = request.POST['password2']
 
-        if not nome.strip():
-            print('O nome não pode ficar em branco')
+        if campo_em_branco(nome):
+            messages.error(request, 'O nome não pode ficar em branco')
             return redirect('cadastro')
 
-        if not email.strip():
-            print('O nome não pode ficar em branco')
+        if campo_em_branco(email):
+            messages.error(request, 'O email não pode ficar em branco')
             return redirect('cadastro')
 
-        if senha != senha2:
-            print('As senhas não são iguais')
+        if senhas_nao_sao_iguais(senha, senha2):
+            messages.error(request, 'As senhas não são iguais')
             return redirect('cadastro')
 
         if User.objects.filter(email=email).exists():
-            print('Voçê ja possui uma conta')
-            return redirect('login')
+            messages.error(request, 'Voçê ja possui uma conta')
+            return redirect('cadastro')
+
+        if User.objects.filter(username=nome).exists():
+            messages.error(request, 'Voçê ja possui uma conta')
+            return redirect('cadastro')
 
         user = User.objects.create_user(username=nome, email=email, password=senha)
         user.save()
-        return redirect('login')
+        messages.success(request, 'Usuário cadastrado com sucesso')
 
+        return redirect('login')
     else:
         return render(request, 'usuarios/cadastro.html')
 
@@ -73,6 +78,34 @@ def cria_receita(request):
         foto_receita = request.FILES['foto_receita']
         user = get_object_or_404(User, pk=request.user.id)
 
+        if campo_em_branco(nome_receita):
+            messages.error(request, 'O campo nome da receita não pode ficar em branco')
+            return redirect('cria_receita')
+
+        if campo_em_branco(ingredientes):
+            messages.error(request, 'O campo de ingredientes não pode ficar em branco')
+            return redirect('cria_receita')
+
+        if campo_em_branco(modo_preparo):
+            messages.error(request, 'O campo modo de preparo não pode ficar em branco')
+            return redirect('cria_receita')
+
+        if campo_em_branco(tempo_preparo):
+            messages.error(request, 'O campo tempo de preparo não pode ficar em branco')
+            return redirect('cria_receita')
+
+        if campo_em_branco(rendimento):
+            messages.error(request, 'O campo rendimento não pode ficar em branco')
+            return redirect('cria_receita')
+
+        if campo_em_branco(categoria):
+            messages.error(request, 'O campo categoria não pode ficar em branco')
+            return redirect('cria_receita')
+
+        if campo_em_branco(foto_receita):
+            messages.error(request, 'O campo foto da receita não pode ficar em branco')
+            return redirect('cria_receita')
+
         receita = Receita.objects.create(pessoa=user, nome_receita=nome_receita, ingredientes=ingredientes, modo_preparo=modo_preparo, tempo_preparo=tempo_preparo, rendimento=rendimento, categoria=categoria, foto_receita=foto_receita)
 
         receita.save()
@@ -83,3 +116,11 @@ def cria_receita(request):
 def logout(request):
     auth.logout(request)
     return redirect('index')
+
+# utils
+
+def campo_em_branco(campo):
+    return not campo.strip()
+
+def senhas_nao_sao_iguais(senha, senha2):
+    return senha != senha2
