@@ -102,10 +102,6 @@ def cria_receita(request):
             messages.error(request, 'O campo categoria não pode ficar em branco')
             return redirect('cria_receita')
 
-        if campo_em_branco(foto_receita):
-            messages.error(request, 'O campo foto da receita não pode ficar em branco')
-            return redirect('cria_receita')
-
         receita = Receita.objects.create(pessoa=user, nome_receita=nome_receita, ingredientes=ingredientes, modo_preparo=modo_preparo, tempo_preparo=tempo_preparo, rendimento=rendimento, categoria=categoria, foto_receita=foto_receita)
 
         receita.save()
@@ -116,6 +112,38 @@ def cria_receita(request):
 def logout(request):
     auth.logout(request)
     return redirect('index')
+
+def deleta_receita(request, id):
+    receita = get_object_or_404(Receita, pk=id)
+    receita.delete()
+    return redirect('dashboard')
+
+def edita_receita(request, id):
+    receita = get_object_or_404(Receita, pk=id)
+
+    receita_a_editar = {
+        'receita': receita
+    }
+    return render(request, 'usuarios/edita_receita.html', receita_a_editar)
+
+def atualiza_receita(request):
+    if request.method == 'POST':
+        receita_id = request.POST['receita_id']
+        receita = get_object_or_404(Receita, pk=receita_id)
+        receita.nome_receita = request.POST['nome_receita']
+        receita.ingredientes = request.POST['ingredientes']
+        receita.modo_preparo = request.POST['modo_preparo']
+        receita.tempo_preparo = request.POST['tempo_preparo']
+        receita.rendimento = request.POST['rendimento']
+        receita.categoria = request.POST['categoria']
+
+        if 'foto_receita' in request.FILES:
+            receita.foto_receita = request.FILES['foto_receita']
+        receita.save()
+        return redirect('dashboard')
+
+
+
 
 # utils
 
